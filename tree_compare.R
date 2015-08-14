@@ -2,6 +2,8 @@ require(ape)
 require(phangorn)
 require(exploratree)
 
+source(baps_score.R)
+
 tree_locations <- "/Users/jl11/Documents/PhD/which_tree/trees"
 distance_locations <- "/Users/jl11/Documents/PhD/which_tree/distance_matrices"
 
@@ -13,6 +15,8 @@ samples <- sort(realtr$tip.label)
 # Trim tips off mapped trees
 tr_parsnp <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"parsnp.tree")),tip="Streptococcus_pneumoniae_TIGR4_v3.gbk.fna"))
 tr_fasttree <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"tigr4_fasttree.tree")),tip="TIGR4_ref"))
+tr_snp_jc_nj <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"snp_alignment_jc_bionj")),tip="TIGR4_ref"))
+tr_snp_logdet_nj <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"snp_alignment_logdet_bionj")),tip="TIGR4_ref"))
 tr_raxml_snps <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_snp_alignment")),tip="TIGR4_ref"))
 tr_raxml_all <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_whole_alignment")),tip="TIGR4_ref"))
 tr_raxml_23F <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_23F_alignment")),tip="Streptococcus_pneumoniae_ATCC_700669_v1"))
@@ -20,9 +24,9 @@ tr_raxml_core <- midpoint(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree
 tr_raxml_mlst <- midpoint(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_mlst_alignment")))
 tr_raxml_cactus <- midpoint(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_progressiveCactus")))
 
-direct_trees <- list(realtr, tr_parsnp, tr_fasttree, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps)
+direct_trees <- list(realtr, tr_parsnp, tr_fasttree, tr_snp_jc_nj, tr_snp_logdet_nj, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps)
 class(direct_trees) <- "multiPhylo"
-names(direct_trees) = c("realtr", "tr_parsnp", "tr_fasttree", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps")
+names(direct_trees) = c("realtr", "tr_parsnp", "tr_fasttree", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps")
 
 # Draw trees from distance matrices
 andi.matrix <- as.matrix(read.table(paste(distance_locations,"andi.matrix.txt",sep = "/"), quote="\"", comment.char=""))[,-1]
@@ -50,9 +54,9 @@ all_trees <- list(realtr, tr_parsnp, tr_fasttree, tr_raxml_cactus, tr_raxml_mlst
 class(all_trees) <- "multiPhylo"
 names(all_trees) = c("realtr", "tr_parsnp", "tr_fasttree", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps", "tr_andi_upgma", "tr_andi_nj", "tr_andi_bionj", "tr_kmer_nj", "tr_kmer_upgma", "tr_kmer_bionj", "tr_ncd_nj", "tr_ncd_upgma", "tr_ncd_bionj")
 # non-NJ trees
-direct_trees <- list(realtr, tr_parsnp, tr_fasttree, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps)
+direct_trees <- list(realtr, tr_parsnp, tr_fasttree, tr_snp_jc_nj, tr_snp_logdet_nj, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps)
 class(direct_trees) <- "multiPhylo"
-names(direct_trees) = c("realtr", "tr_parsnp", "tr_fasttree", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps")
+names(direct_trees) = c("realtr", "tr_parsnp", "tr_fasttree", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps")
 
 # Calibrate with random trees
 num_random = 100
@@ -79,24 +83,29 @@ plot(midpoint(nj(topology_all)))
 plot(cmdscale(topology_all))
 text(cmdscale(topology_all),names(all_trees), cex=0.6, pos=4, col="red")
 
-branch_all <- as.matrix(multi.dist(all_trees, lambda = 1))
-dimnames(branch_all) = list(names(all_trees), names(all_trees))
-plot(midpoint(nj(branch_all)))
-plot(cmdscale(branch_all))
-text(cmdscale(branch_all),names(all_trees), cex=0.6, pos=4, col="red")
-
-balanced_all <- as.matrix(multi.dist(all_trees, lambda = 0.5))
-dimnames(balanced_all) = list(names(all_trees), names(all_trees))
-plot(midpoint(nj(balanced_all)))
-plot(cmdscale(balanced_all))
-text(cmdscale(balanced_all),names(all_trees), cex=0.6, pos=4, col="red")
-
 branch_direct <- as.matrix(multi.dist(direct_trees, lambda = 1))
 dimnames(branch_direct) = list(names(direct_trees), names(direct_trees))
 plot(midpoint(nj(branch_direct)))
 plot(cmdscale(branch_direct))
 text(cmdscale(branch_direct),names(direct_trees), cex=0.6, pos=4, col="red")
 
+balanced_direct <- as.matrix(multi.dist(direct_trees, lambda = 0.5))
+dimnames(balanced_direct) = list(names(direct_trees), names(direct_trees))
+plot(midpoint(nj(balanced_direct)))
+plot(cmdscale(balanced_direct))
+text(cmdscale(balanced_direct),names(direct_trees), cex=0.6, pos=4, col="red")
+
 # BAPS distances
+baps1_random <- unlist(lapply(tr_random, function(x) baps.score(x, "../clusters.txt")))
+mean(baps1_random)
+quantile(baps1_random, probs = c(0.05, 0.95))
+
+baps2_random <- unlist(lapply(tr_random, function(x) baps.score(x, "../clusters.txt", cluster_col = 3)))
+mean(baps2_random)
+quantile(baps2_random, probs = c(0.05, 0.95))
+
+baps1_scores <- unlist(lapply(all_trees, function(x) baps.score(x, "../clusters.txt")))
+
+baps2_scores <- unlist(lapply(all_trees, function(x) baps.score(x, "../clusters.txt", cluster_col = 3)))
 
 # (will also want plots with BAPS clusters in phylocanvas)
