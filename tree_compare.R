@@ -2,7 +2,7 @@ require(ape)
 require(phangorn)
 require(exploratree)
 
-source(baps_score.R)
+source("../code/baps_score.R")
 
 tree_locations <- "/Users/jl11/Documents/PhD/which_tree/trees"
 distance_locations <- "/Users/jl11/Documents/PhD/which_tree/distance_matrices"
@@ -15,18 +15,15 @@ samples <- sort(realtr$tip.label)
 # Trim tips off mapped trees
 tr_parsnp <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"parsnp.tree")),tip="Streptococcus_pneumoniae_TIGR4_v3.gbk.fna"))
 tr_fasttree <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"tigr4_fasttree.tree")),tip="TIGR4_ref"))
-tr_snp_jc_nj <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"snp_alignment_jc_bionj")),tip="TIGR4_ref"))
-tr_snp_logdet_nj <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"snp_alignment_logdet_bionj")),tip="TIGR4_ref"))
+tr_snp_jc_nj <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"snp_alignment_jc_bionj.tre")),tip="TIGR4_ref"))
+tr_snp_logdet_nj <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"snp_alignment_logdet_bionj.tre")),tip="TIGR4_ref"))
+tr_phyml_all <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"TIGR4_ref_bwa_snps-PhyML_tree.tre")),tip="TIGR4_ref"))
 tr_raxml_snps <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_snp_alignment")),tip="TIGR4_ref"))
 tr_raxml_all <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_whole_alignment")),tip="TIGR4_ref"))
 tr_raxml_23F <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_23F_alignment")),tip="Streptococcus_pneumoniae_ATCC_700669_v1"))
 tr_raxml_core <- midpoint(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_core_tree")))
 tr_raxml_mlst <- midpoint(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_mlst_alignment")))
 tr_raxml_cactus <- midpoint(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_progressiveCactus")))
-
-direct_trees <- list(realtr, tr_parsnp, tr_fasttree, tr_snp_jc_nj, tr_snp_logdet_nj, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps)
-class(direct_trees) <- "multiPhylo"
-names(direct_trees) = c("realtr", "tr_parsnp", "tr_fasttree", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps")
 
 # Draw trees from distance matrices
 andi.matrix <- as.matrix(read.table(paste(distance_locations,"andi.matrix.txt",sep = "/"), quote="\"", comment.char=""))[,-1]
@@ -50,13 +47,13 @@ tr_kmer_nj <- midpoint(nj(kmer_distances))
 tr_kmer_bionj <- midpoint(bionj(kmer_distances/max(kmer_distances))) # distances must be < 100
 tr_kmer_upgma <- midpoint(upgma(kmer_distances))
 
-all_trees <- list(realtr, tr_parsnp, tr_fasttree, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps, tr_andi_upgma, tr_andi_nj, tr_andi_bionj, tr_kmer_nj, tr_kmer_upgma, tr_kmer_bionj, tr_ncd_nj, tr_ncd_upgma, tr_ncd_bionj)
+all_trees <- list(realtr, tr_parsnp, tr_fasttree, tr_snp_jc_nj, tr_snp_logdet_nj, tr_phyml_all, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps, tr_andi_upgma, tr_andi_nj, tr_andi_bionj, tr_kmer_nj, tr_kmer_upgma, tr_kmer_bionj, tr_ncd_nj, tr_ncd_upgma, tr_ncd_bionj)
 class(all_trees) <- "multiPhylo"
-names(all_trees) = c("realtr", "tr_parsnp", "tr_fasttree", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps", "tr_andi_upgma", "tr_andi_nj", "tr_andi_bionj", "tr_kmer_nj", "tr_kmer_upgma", "tr_kmer_bionj", "tr_ncd_nj", "tr_ncd_upgma", "tr_ncd_bionj")
+names(all_trees) = c("realtr", "tr_parsnp", "tr_fasttree", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_phyml_all", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps", "tr_andi_upgma", "tr_andi_nj", "tr_andi_bionj", "tr_kmer_nj", "tr_kmer_upgma", "tr_kmer_bionj", "tr_ncd_nj", "tr_ncd_upgma", "tr_ncd_bionj")
 # non-NJ trees
-direct_trees <- list(realtr, tr_parsnp, tr_fasttree, tr_snp_jc_nj, tr_snp_logdet_nj, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps)
+direct_trees <- list(realtr, tr_parsnp, tr_fasttree, tr_snp_jc_nj, tr_snp_logdet_nj, tr_phyml_all, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps)
 class(direct_trees) <- "multiPhylo"
-names(direct_trees) = c("realtr", "tr_parsnp", "tr_fasttree", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps")
+names(direct_trees) = c("realtr", "tr_parsnp", "tr_fasttree", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_phyml_all", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps")
 
 # Calibrate with random trees
 num_random = 100

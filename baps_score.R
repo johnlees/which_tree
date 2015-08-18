@@ -28,7 +28,7 @@ baps.score <- function(tree, cluster_file, cluster_col=2, tip_col=1, bin_cluster
       for (j in i+1:nrow(in_cluster))
       {
         out_of_cluster <- !(mrca.descendants(tree, as.character(in_cluster[i, tip_col]), as.character(in_cluster[j, tip_col])) %in% in_cluster[,tip_col])
-        total_score <- total_score + sum(out_of_cluster)
+        total_score <- total_score + any(out_of_cluster)
       }
     }
   }
