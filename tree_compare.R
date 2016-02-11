@@ -1,6 +1,6 @@
 require(ape)
 require(phangorn)
-require(exploratree)
+require(treescape)
 
 setwd("~/Documents/PhD/which_tree/trees/")
 
@@ -13,6 +13,8 @@ distance_locations <- "/Users/jl11/Documents/PhD/which_tree/distance_matrices"
 realtr <- midpoint(read.tree(paste(sep="/",tree_locations,"RealTree.nwk")))
 realtr$edge.length <- realtr$edge.length*0.01 # correct for scaling introduced by ALF
 samples <- sort(realtr$tip.label)
+
+tr_gene_pres <- midpoint(read.tree(paste(sep="/",tree_locations,"RAxML_result.gene_presence_absence")))
 
 # Trim tips off mapped trees
 tr_parsnp <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"parsnp.tree")),tip="Streptococcus_pneumoniae_TIGR4_v3.gbk.fna"))
@@ -57,9 +59,13 @@ tr_kmer_nj <- midpoint(nj(kmer_distances))
 tr_kmer_bionj <- midpoint(bionj(kmer_distances/max(kmer_distances))) # distances must be < 100
 tr_kmer_upgma <- midpoint(upgma(kmer_distances))
 
-all_trees <- list(realtr, tr_parsnp, tr_fasttree_slow, tr_fasttree_fast, tr_snp_jc_nj, tr_snp_logdet_nj, tr_phyml_all, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps, tr_andi_upgma, tr_andi_nj, tr_andi_bionj, tr_mash_upgma, tr_mash_nj, tr_mash_bionj, tr_kmer_nj, tr_kmer_upgma, tr_kmer_bionj, tr_ncd_nj, tr_ncd_upgma, tr_ncd_bionj)
+bigsdb.matrix <- as.matrix(read.table(paste(distance_locations,"bigs_db_dist_mat.txt",sep = "/"), quote="\"", comment.char="", sep = ","))
+dimnames(bigsdb.matrix) = list(samples, samples)
+tr_bigs_bionj <- midpoint(bionj(bigsdb.matrix))
+
+all_trees <- list(realtr, tr_gene_pres, tr_parsnp, tr_fasttree_slow, tr_fasttree_fast, tr_snp_jc_nj, tr_snp_logdet_nj, tr_phyml_all, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps, tr_andi_upgma, tr_andi_nj, tr_andi_bionj, tr_mash_upgma, tr_mash_nj, tr_mash_bionj, tr_kmer_nj, tr_kmer_upgma, tr_kmer_bionj, tr_ncd_nj, tr_ncd_upgma, tr_ncd_bionj, tr_bigs_bionj)
 class(all_trees) <- "multiPhylo"
-names(all_trees) = c("realtr", "tr_parsnp", "tr_fasttree_slow", "tr_fasttree_fast", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_phyml_all", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps", "tr_andi_upgma", "tr_andi_nj", "tr_andi_bionj", "tr_mash_upgma", "tr_mash_nj", "tr_mash_bionj", "tr_kmer_nj", "tr_kmer_upgma", "tr_kmer_bionj", "tr_ncd_nj", "tr_ncd_upgma", "tr_ncd_bionj")
+names(all_trees) = c("realtr", "tr_gene_pres", "tr_parsnp", "tr_fasttree_slow", "tr_fasttree_fast", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_phyml_all", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_raxml_all", "tr_raxml_snps", "tr_andi_upgma", "tr_andi_nj", "tr_andi_bionj", "tr_mash_upgma", "tr_mash_nj", "tr_mash_bionj", "tr_kmer_nj", "tr_kmer_upgma", "tr_kmer_bionj", "tr_ncd_nj", "tr_ncd_upgma", "tr_ncd_bionj", "tr_bigs_bionj")
 # non-NJ trees
 direct_trees <- list(realtr, tr_parsnp, tr_fasttree_slow, tr_fasttree_fast, tr_snp_jc_nj, tr_snp_logdet_nj, tr_phyml_all, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_raxml_all, tr_raxml_snps)
 class(direct_trees) <- "multiPhylo"
@@ -71,20 +77,20 @@ tr_random = rmtree(num_random,96,tip.label = samples)
 tr_random <- lapply(tr_random,midpoint)
 class(tr_random) <- "multiPhylo"
 
-rand_distances <- unlist(lapply(tr_random, function(x) tree.dist(realtr, x, lambda = 0)))
+rand_distances <- unlist(lapply(tr_random, function(x) treeDist(realtr, x, lambda = 0)))
 mean(rand_distances)
 quantile(rand_distances, probs = c(0.05, 0.95))
 
 # Distances vs. true tree
 #   Lambda = 0, 0.5, 1
-topology_dist <- lapply(all_trees, function(x) tree.dist(realtr, x, lambda = 0))
-branch_dist <- lapply(all_trees, function(x) tree.dist(realtr, x, lambda = 1))
-balanced_dist <- lapply(all_trees, function(x) tree.dist(realtr, x, lambda = 0.5))
+topology_dist <- lapply(all_trees, function(x) treeDist(realtr, x, lambda = 0))
+branch_dist <- lapply(all_trees, function(x) treeDist(realtr, x, lambda = 1))
+balanced_dist <- lapply(all_trees, function(x) treeDist(realtr, x, lambda = 0.5))
 
 # Distances all vs. all
 #   Lambda = 0, 0.5, 1
 #   MDS plot + NJ tree
-topology_all <- as.matrix(multi.dist(all_trees, lambda = 0))
+topology_all <- as.matrix(multiDist(all_trees, lambda = 0))
 dimnames(topology_all) = list(names(all_trees), names(all_trees))
 plot(midpoint(nj(topology_all)))
 plot(cmdscale(topology_all))
@@ -95,13 +101,13 @@ pdf(file="../tree_plots/supertree.pdf",width = 10, height = 8)
 plot(midpoint(nj(topology_all)),tip.color=c("red",rep("black",length(midpoint(nj(topology_all))$tip.label)-1)),font=1)
 dev.off()
 
-branch_direct <- as.matrix(multi.dist(direct_trees, lambda = 1))
+branch_direct <- as.matrix(multiDist(direct_trees, lambda = 1))
 dimnames(branch_direct) = list(names(direct_trees), names(direct_trees))
 plot(midpoint(nj(branch_direct)))
 plot(cmdscale(branch_direct))
 text(cmdscale(branch_direct),names(direct_trees), cex=0.6, pos=4, col="red")
 
-balanced_direct <- as.matrix(multi.dist(direct_trees, lambda = 0.5))
+balanced_direct <- as.matrix(multiDist(direct_trees, lambda = 0.5))
 dimnames(balanced_direct) = list(names(direct_trees), names(direct_trees))
 plot(midpoint(nj(balanced_direct)))
 plot(cmdscale(balanced_direct))
