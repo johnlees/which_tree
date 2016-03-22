@@ -26,7 +26,7 @@ tr_phyml_all <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"TIGR4_
 tr_raxml_snps <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_snp_alignment")),tip="TIGR4_ref"))
 tr_raxml_all <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_whole_alignment")),tip="TIGR4_ref"))
 tr_raxml_23F <- midpoint(drop.tip(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_23F_alignment")),tip="Streptococcus_pneumoniae_ATCC_700669_v1"))
-tr_no_recomb <- midpoint(drop.tip(read.tree(paste(sep="/", treelocations, "../trees/RAxML_bestTree.ml_23F_alignment_recomb_off")),tip="Streptococcus_pneumoniae_ATCC_700669_v1"))
+tr_no_recomb <- midpoint(drop.tip(read.tree(paste(sep="/", tree_locations, "../trees/RAxML_bestTree.ml_23F_alignment_recomb_off")),tip="Streptococcus_pneumoniae_ATCC_700669_v1"))
 tr_raxml_core <- midpoint(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_core_tree")))
 tr_raxml_mlst <- midpoint(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_mlst_alignment")))
 tr_raxml_cactus <- midpoint(read.tree(paste(sep="/",tree_locations,"RAxML_bestTree.ml_progressiveCactus")))
@@ -67,10 +67,12 @@ tr_bigs_bionj <- midpoint(bionj(bigsdb.matrix/max(bigsdb.matrix)))
 all_trees <- list(realtr, tr_gene_pres, tr_parsnp, tr_fasttree_slow, tr_fasttree_fast, tr_snp_jc_nj, tr_snp_logdet_nj, tr_phyml_all, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_no_recomb, tr_raxml_all, tr_raxml_snps, tr_andi_upgma, tr_andi_nj, tr_andi_bionj, tr_mash_upgma, tr_mash_nj, tr_mash_bionj, tr_kmer_nj, tr_kmer_upgma, tr_kmer_bionj, tr_ncd_nj, tr_ncd_upgma, tr_ncd_bionj, tr_bigs_bionj)
 class(all_trees) <- "multiPhylo"
 names(all_trees) = c("realtr", "tr_gene_pres", "tr_parsnp", "tr_fasttree_slow", "tr_fasttree_fast", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_phyml_all", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_no_recomb", "tr_raxml_all", "tr_raxml_snps", "tr_andi_upgma", "tr_andi_nj", "tr_andi_bionj", "tr_mash_upgma", "tr_mash_nj", "tr_mash_bionj", "tr_kmer_nj", "tr_kmer_upgma", "tr_kmer_bionj", "tr_ncd_nj", "tr_ncd_upgma", "tr_ncd_bionj", "tr_bigs_bionj")
+saveRDS(all_trees, "all_trees.Rdata")
 # non-NJ trees
 direct_trees <- list(realtr, tr_parsnp, tr_fasttree_slow, tr_fasttree_fast, tr_snp_jc_nj, tr_snp_logdet_nj, tr_phyml_all, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_no_recomb, tr_raxml_all, tr_raxml_snps)
 class(direct_trees) <- "multiPhylo"
 names(direct_trees) = c("realtr", "tr_parsnp", "tr_fasttree_slow", "tr_fasttree_fast", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_phyml_all", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_no_recomb", "tr_raxml_all", "tr_raxml_snps")
+saveRDS(direct_trees, "direct_trees.Rdata")
 
 # Calibrate with random trees
 num_random = 100
@@ -119,12 +121,12 @@ baps1_random <- unlist(lapply(tr_random, function(x) baps.score(x, "../clusters.
 mean(baps1_random)
 quantile(baps1_random, probs = c(0.05, 0.95))
 
-baps2_random <- unlist(lapply(tr_random, function(x) baps.score(x, "../clusters.txt", cluster_col = 3)))
+baps2_random <- unlist(lapply(tr_random, function(x) baps.score(x, "../clusters.txt", cluster_col = 3, bin_clusters = 1)))
 mean(baps2_random)
 quantile(baps2_random, probs = c(0.05, 0.95))
 
 baps1_scores <- unlist(lapply(all_trees, function(x) baps.score(x, "../clusters.txt")))
 
-baps2_scores <- unlist(lapply(all_trees, function(x) baps.score(x, "../clusters.txt", cluster_col = 3)))
+baps2_scores <- unlist(lapply(all_trees, function(x) baps.score(x, "../clusters.txt", cluster_col = 3, bin_clusters = 1)))
 
 # (will also want plots with BAPS clusters in phylocanvas)
