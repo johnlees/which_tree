@@ -1,0 +1,89 @@
+---
+title: "Treespace plots"
+author: "Michelle Kendall and John Lees"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, dpi=96, fig.width=9, fig.height=8, dev="png")
+```
+
+First, load packages and data:
+
+```{r load_packages, message=F}
+library(treespace)
+library(ggplot2)
+library(here)
+# NB this assumes the trees are in the project directory, or specfically wherever "here()" points
+trees <- readRDS(here("publication_trees.rds"))
+```
+
+### Basic MDS plot
+
+Treespace analysis:
+```{r initial_treespace}
+JLtreespace <- treespace(trees, nf=3)
+plotGrovesD3(JLtreespace$pco)
+```
+
+Note the clustering.
+
+Colouring the trees by type:
+
+```{r treeTypes}
+names(trees)
+treeTypes <- c("true","algn","algn","algn",
+               "algn","partial","algn","partial",
+               "dist-a","dist-af","partial","dist-af",
+               "partial","dist-af","dist-af","dist-af",
+               "dist-af")
+plotGrovesD3(JLtreespace$pco, treeNames=names(trees), groups=treeTypes,
+             colors=c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442"),
+             labels_size=20)
+```
+
+### Plot distances from true tree
+
+Another way of displaying the distances, this time just the distances from the true tree. We will colour the points by type again, and size the points according to CPU time (as given in Table 1).
+
+```{r distancesFromTrue}
+# read in info from table
+times <- read.table(here("CPU_times.csv"))[,1]
+
+distancesFromTrue <- cbind.data.frame("tree"=names(trees[2:17]),
+                                      "dist"=as.matrix(JLtreespace$D)[2:17,1],
+                                      "type"=treeTypes[2:17],
+                                      "times"=times)
+# set nice ordering
+distancesFromTrue$tree <- factor(distancesFromTrue$tree, distancesFromTrue$tree[order(distancesFromTrue[,2])])
+
+ggplot(data=distancesFromTrue, aes(x=tree,y=dist)) + 
+  geom_point(aes(colour=factor(type),size=times)) + 
+  scale_color_manual("Method", values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) +
+  scale_size("CPU time (mins)", range=c(2,15)) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  xlab("Tree") + ylab("Distance from real tree")
+```
+
+
+### Highlighting the tree differences
+
+Finally, some "plotTreeDiff" illustrations which might help to show what KC scores of "4.35", "11.31" and "210.5" actually look like. 
+
+```{r plotTreeDiffs, fig.height=30}
+# plot difference between true and the closest reconstruction, RAxML + 23F aln (distance 4.35):
+plotTreeDiff(trees[[1]],trees[[2]], treesFacing=T,
+             use.edge.length=F, colourMethod = "palette", sizeOfDifferences = T)
+
+# plot difference between true and one a little further away, the IQ-tree fast (distance 11.3):
+plotTreeDiff(trees[[1]],trees[[4]], treesFacing=T, tipMatch = F,
+             use.edge.length=F, colourMethod = "palette", sizeOfDifferences = T)
+
+
+# plot difference between true and furthest, UPGMA + NCD ( 210.5):
+plotTreeDiff(trees[[1]],trees[[17]], treesFacing=T, tipMatch = T,
+             use.edge.length=F, colourMethod = "palette", sizeOfDifferences = T)

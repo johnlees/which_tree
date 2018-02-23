@@ -7,11 +7,12 @@ require(scatterD3)
 setwd("~/Documents/PhD/which_tree")
 
 # Read in mrbayes tree posterior of real data
-trees_in1 <- read.nexus("mrbayes/core_gene_snps.nexus.run1.t")
-trees_in2 <- read.nexus("mrbayes/core_gene_snps.nexus.run2.t")
+trees_in1 <- read.nexus("mrbayes/core_gene_snps.nexus.run1.t")[-1:-200] # Removing burn-in
+trees_in2 <- read.nexus("mrbayes/core_gene_snps.nexus.run2.t")[-1:-200]
 
 real_trees_in <- c(trees_in1, trees_in2)
-names(real_trees_in) <- c(names(trees_in1), names(trees_in2))
+names(real_trees_in) <- c(paste("real.1.", names(trees_in1), sep = "."),
+                          paste("real.2.", names(trees_in2), sep = "."))
 
 real_trees_in <- lapply(real_trees_in, midpoint)
 class(real_trees_in) <- "multiPhylo"
@@ -23,7 +24,8 @@ trees_in1 <- read.nexus("mrbayes/tigr4_ref_snps.nexus.run1.t")
 trees_in2 <- read.nexus("mrbayes/tigr4_ref_snps.nexus.run2.t")
 
 simulated_trees_in <- c(trees_in1, trees_in2)
-names(simulated_trees_in) <- c(names(trees_in1), names(trees_in2))
+names(simulated_trees_in) <- c(paste("sim.1.", names(trees_in1), sep = "."),
+                               paste("sim.2.", names(trees_in2), sep = "."))
 
 simulated_trees_in <- lapply(simulated_trees_in, drop.tip, "TIGR4_ref")
 simulated_trees_in <- lapply(simulated_trees_in, midpoint)
@@ -60,18 +62,24 @@ projection <- as.data.frame(all_mds$points)
 row.names(projection) <- names(combined)
 projection <- cbind(projection, 
                     c(rep("Real", length(real_trees_in)), rep("Simulated", length(simulated_trees_in))))
-colnames(projection) <- c("Dimension 1", "Dimension 2", "Data")
+colnames(projection) <- c("Dimension_1", "Dimension_2", "Data")
 
 ggplot(projection, aes(Dimension_1, Dimension_2)) + 
-  geom_point(aes(colour=factor(Method))) +
+  geom_point(aes(colour=factor(Data))) +
   theme_bw()
 
 scatterD3(x = projection$Dimension_1, 
           y = projection$Dimension_2, 
           lab = rownames(projection),
-          col_var=projection$Method,
+          col_var=projection$Data,
           xlab = "Dimension 1", 
           ylab = "Dimension 2", 
           col_lab = "Method type")
+
+# Find the median trees
+combined.groves <- findGroves(combined, nclust=5)
+medians <- medTree(combined, all_dists.groves$groups)
+med.trees <- lapply(medians, function(e) ladderize(e$trees[[1]]))
+
 
 
