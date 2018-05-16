@@ -43,6 +43,8 @@ bwa mem TIGR4_ref.fa SE0xx_1.fq.gz SE0xx_2.fq.gz | samtools fixmate -O bam - SE0
 samtools mpileup -C 50 -m 2 -F 0.0005 -d 1000 -t DP,SP -L 1000 -g -u -f TIGR4_ref.fa SE0xx.bam | bcftools call -vm -S samples.txt -O z -o SE0xx.vcf.gz
 ```
 
+Associated data can be downloaded [here](https://doi.org/10.6084/m9.figshare.5483461).
+
 Tree construction
 -----------------
 Software and versions are documented in the paper. Distance matrices are
@@ -121,12 +123,10 @@ roary -p 4 -r *.gff
 Comparing trees
 ---------------
 All code is in `tree_compare.R`. The input trees can be downloaded from
-figshare:
-
-Or load the `.rds` objects in the repo.
+[figshare](10.6084/m9.figshare.5483464), or load the `.rds` objects in the repo.
 
 Comparison between the trees for real data is in `mass_trees.R`.
 
 Interactive plots can be knitted from the `.rmd` files, or download the
-resulting html from figshare.
+[resulting html from figshare](https://doi.org/10.6084/m9.figshare.5923300).
 
