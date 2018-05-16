@@ -85,6 +85,7 @@ fasttree:
 ```
 FastTree -nt -pseudo -fastest < TIGR4_ref_bwa.aln > tigr4_fasttree_fast.tree
 FastTree -nt -gttr < TIGR4_ref_bwa.aln > tigr4_fasttree_slow.tree
+```
 
 mash:
 ```
