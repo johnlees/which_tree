@@ -1,0 +1,40 @@
+---
+title: "Treespace plots (mrbayes)"
+author: "Michelle Kendall and John Lees"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, dpi=96, fig.width=9, fig.height=8, dev="png")
+```
+
+First, load packages and data:
+  
+```{r load_packages, message=F}
+library(treespace)
+library(ggplot2)
+library(here)
+# NB this assumes the trees are in the project directory, or specfically wherever "here()" points
+mrbayes_tr <- readRDS(here("mrbayes_trees.rds"))
+```
+
+### Clustering
+
+Treespace analysis:
+```{r initial_treespace}
+mrbayes_treespace = treespace(mrbayes_tr, nf=3)
+```
+
+Colouring the trees by type:
+  
+```{r treeTypes}
+treeTypes = c("True", rep("Chain1", 66), rep("Chain2", 66))
+plotGrovesD3(mrbayes_treespace$pco, treeNames=names(mrbayes_tr), groups=treeTypes,
+             colors=c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442"),
+             labels_size=6)
+```
+

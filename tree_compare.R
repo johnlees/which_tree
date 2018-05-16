@@ -2,10 +2,10 @@ require(ape)
 require(phangorn)
 require(treespace)
 
-setwd("~/jl11/Documents/PhD/which_tree/trees/")
+# not used
+#source("../code/baps_score.R")
 
-source("../code/baps_score.R")
-
+# local - download from figshare repo if needed
 tree_locations <- "~/jl11/Documents/PhD/which_tree/trees"
 distance_locations <- "~/jl11/Documents/PhD/which_tree/distance_matrices"
 
@@ -67,6 +67,18 @@ bigsdb.matrix <- as.matrix(read.table(paste(distance_locations,"bigs_db_dist_mat
 dimnames(bigsdb.matrix) = list(samples, samples)
 tr_bigs_bionj <- midpoint(bionj(bigsdb.matrix/max(bigsdb.matrix)))
 
+disty.matrix <- as.matrix(read.table(paste(distance_locations,"disty.txt",sep = "/")))
+disty.matrix = disty.matrix[-1,-1]
+disty.matrix = disty.matrix/max(disty.matrix)
+
+disty.matrix <- as.matrix(read.table(paste(distance_locations,"disty_snps.txt",sep = "/")))
+disty.matrix = disty.matrix[-97,-97]
+disty.matrix = disty.matrix/max(disty.matrix)
+
+tr_disty_nj <- midpoint(nj(disty.matrix))
+tr_disty_bionj <- midpoint(bionj(disty.matrix))
+tr_disty_upgma <-  midpoint(upgma(disty.matrix))
+
 all_trees <- list(realtr, tr_iqtree_fast, tr_iqtree_slow, tr_raxml_pres_abs, tr_parsnp, tr_fasttree_slow, tr_fasttree_fast, tr_snp_jc_nj, tr_snp_logdet_nj, tr_phyml_all, tr_raxml_cactus, tr_raxml_mlst, tr_raxml_core, tr_raxml_23F, tr_no_recomb, tr_raxml_all, tr_raxml_snps, tr_andi_upgma, tr_andi_nj, tr_andi_bionj, tr_mash_upgma, tr_mash_nj, tr_mash_bionj, tr_kmer_nj, tr_kmer_upgma, tr_kmer_bionj, tr_ncd_nj, tr_ncd_upgma, tr_ncd_bionj, tr_bigs_bionj)
 class(all_trees) <- "multiPhylo"
 names(all_trees) = c("realtr", "tr_iqtree_fast", "tr_iqtree_slow", "tr_gene_pres", "tr_parsnp", "tr_fasttree_slow", "tr_fasttree_fast", "tr_snp_jc_nj", "tr_snp_logdet_nj", "tr_phyml_all", "tr_raxml_cactus", "tr_raxml_mlst", "tr_raxml_core", "tr_raxml_23F", "tr_no_recomb", "tr_raxml_all", "tr_raxml_snps", "tr_andi_upgma", "tr_andi_nj", "tr_andi_bionj", "tr_mash_upgma", "tr_mash_nj", "tr_mash_bionj", "tr_kmer_nj", "tr_kmer_upgma", "tr_kmer_bionj", "tr_ncd_nj", "tr_ncd_upgma", "tr_ncd_bionj", "tr_bigs_bionj")
@@ -80,7 +92,10 @@ saveRDS(direct_trees, "direct_trees.rds")
 pub_trees = list(realtr, tr_raxml_23F, tr_raxml_snps, tr_iqtree_fast, tr_iqtree_slow, tr_parsnp, tr_fasttree_fast, tr_raxml_core, tr_snp_jc_nj, tr_mash_bionj, tr_raxml_mlst, tr_andi_bionj, tr_raxml_cactus, tr_raxml_pres_abs, tr_kmer_bionj, tr_bigs_bionj, tr_ncd_upgma)
 class(pub_trees) = "multiPhylo"
 names(pub_trees) = c("Real tree", "RAxML + 23F aln", "RAxML + TIGR4 aln", "IQ-TREE fast", "IQ-TREE slow", "Parsnp", "FastTree", "RAxML + core aln", "NJ + JC dist", "BIONJ + mash dist", "RAxML + MLST aln", "BIONJ + andi dist", "RAxML + cactus aln", "RAxML + pres/abs", "BIONJ + kmer dist", "BIONJ + BIGSdb", "UPGMA + NCD")
-saveRDS(pub_trees, "publication_trees.rds")
+saveRDS(pub_trees, "publication_trees.rds") 
+
+# read from figshare repo, if needed
+#pub_trees = readRDS("publication_trees.rds")
 
 # Calibrate with random trees
 num_random = 100
@@ -124,15 +139,16 @@ plot(midpoint(nj(balanced_direct)))
 plot(cmdscale(balanced_direct))
 text(cmdscale(balanced_direct),names(direct_trees), cex=0.6, pos=4, col="red")
 
+# Not run
 # BAPS distances
-baps1_random <- unlist(lapply(tr_random, function(x) baps.score(x, "../clusters.txt")))
-mean(baps1_random)
-quantile(baps1_random, probs = c(0.05, 0.95))
+#baps1_random <- unlist(lapply(tr_random, function(x) baps.score(x, "../clusters.txt")))
+#mean(baps1_random)
+#quantile(baps1_random, probs = c(0.05, 0.95))
 
-baps2_random <- unlist(lapply(tr_random, function(x) baps.score(x, "../clusters.txt", cluster_col = 3, bin_clusters = 1)))
-mean(baps2_random)
-quantile(baps2_random, probs = c(0.05, 0.95))
+#baps2_random <- unlist(lapply(tr_random, function(x) baps.score(x, "../clusters.txt", cluster_col = 3, bin_clusters = 1)))
+#mean(baps2_random)
+#quantile(baps2_random, probs = c(0.05, 0.95))
 
-baps1_scores <- unlist(lapply(all_trees, function(x) baps.score(x, "../clusters.txt")))
+#baps1_scores <- unlist(lapply(all_trees, function(x) baps.score(x, "../clusters.txt")))
 
-baps2_scores <- unlist(lapply(all_trees, function(x) baps.score(x, "../clusters.txt", cluster_col = 3, bin_clusters = 1)))
+#baps2_scores <- unlist(lapply(all_trees, function(x) baps.score(x, "../clusters.txt", cluster_col = 3, bin_clusters = 1)))

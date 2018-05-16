@@ -1,0 +1,7 @@
+set autoclose=yes nowarn=yes
+execute tigr4_ref_snps.nexus
+lset nst=6 rates=gamma
+mcmc ngen=1000000 savebrlens=yes samplefreq=1000 printfreq=1000 diagnfreq=10000
+sump burnin=2500
+sumt burnin=2500
+quit
