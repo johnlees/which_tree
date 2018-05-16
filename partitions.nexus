@@ -1,0 +1,6 @@
+#nexus
+begin sets;
+    charset snps = mapped_alignment.phy: 1-2176723;
+    charset genes = gene_presence_absence.phy: 1-3905;
+    charpartition mine = GTR+G:snps, GTR2:genes;
+end;
